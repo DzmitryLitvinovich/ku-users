@@ -1,9 +1,15 @@
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws Exception{
 
         UserRepository userRepository = new UserRepository();
+
+        List<User> users = userRepository.getAllUsers();
+        for (User user : users) {
+            System.out.println(user);
+        }
 
 //        User user = userRepository.findById(2L);
 //        System.out.println(user);

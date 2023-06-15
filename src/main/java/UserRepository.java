@@ -9,6 +9,10 @@ public class UserRepository {
     private static final String USERNAME = "postgres";
     private static final String PASSWORD = "postgres";
 
+    private static final String SELECT_QUERY = """
+            SELECT * FROM users
+    """;
+
     private static final String FIND_BY_ID_QUERY = """
             SELECT * FROM users WHERE id = ?
     """;
@@ -28,6 +32,28 @@ public class UserRepository {
             DELETE FROM users
             WHERE id = ?
     """;
+
+    public List<User> getAllUsers() throws SQLException {
+        List<User> users = new ArrayList<>();
+        try (Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_QUERY);
+             ResultSet resultSet = preparedStatement.executeQuery()
+        ) {
+            while (resultSet.next()) {
+                User user = new User();
+                user.setId(resultSet.getLong("id"));
+                user.setName(resultSet.getString("name"));
+                user.setSurname(resultSet.getString("surname"));
+                user.setAge(resultSet.getInt("age"));
+                user.setUsername(resultSet.getString("username"));
+                user.setPassword(resultSet.getString("password"));
+                user.setInsertedAtUtc(resultSet.getTimestamp("inserted_date_at_utc").toLocalDateTime());
+
+                users.add(user);
+            }
+        }
+        return users;
+    }
 
     public User findById(Long id) throws SQLException {
         try(Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
