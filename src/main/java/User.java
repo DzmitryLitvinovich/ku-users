@@ -8,7 +8,7 @@ public class User {
     private int age;
     private String username;
     private String password;
-    private LocalDateTime insertedAtUtc;
+    private LocalDateTime insertedDateAtUtc;
 
     public Long getId() {
         return id;
@@ -58,12 +58,12 @@ public class User {
         this.password = password;
     }
 
-    public LocalDateTime getInsertedAtUtc() {
-        return insertedAtUtc;
+    public LocalDateTime getInsertedDateAtUtc() {
+        return insertedDateAtUtc;
     }
 
-    public void setInsertedAtUtc(LocalDateTime insertedAtUtc) {
-        this.insertedAtUtc = insertedAtUtc;
+    public void setInsertedDateAtUtc(LocalDateTime insertedDateAtUtc) {
+        this.insertedDateAtUtc = insertedDateAtUtc;
     }
 
     @Override
@@ -71,12 +71,12 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return age == user.age && Objects.equals(id, user.id) && Objects.equals(name, user.name) && Objects.equals(surname, user.surname) && Objects.equals(username, user.username) && Objects.equals(password, user.password) && Objects.equals(insertedAtUtc, user.insertedAtUtc);
+        return age == user.age && Objects.equals(id, user.id) && Objects.equals(name, user.name) && Objects.equals(surname, user.surname) && Objects.equals(username, user.username) && Objects.equals(password, user.password) && Objects.equals(insertedDateAtUtc, user.insertedDateAtUtc);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, surname, age, username, password, insertedAtUtc);
+        return Objects.hash(id, name, surname, age, username, password, insertedDateAtUtc);
     }
 
     @Override
@@ -88,7 +88,7 @@ public class User {
                 ", age=" + age +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
-                ", inserted_date_at_utc=" + insertedAtUtc +
+                ", inserted_date_at_utc=" + insertedDateAtUtc +
                 '}';
     }
 }

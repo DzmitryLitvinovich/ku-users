@@ -10,44 +10,56 @@ public class UserRepository {
     private static final String PASSWORD = "postgres";
 
     private static final String SELECT_QUERY = """
-            SELECT * FROM users
+        SELECT * FROM users
     """;
 
     private static final String FIND_BY_ID_QUERY = """
-            SELECT * FROM users WHERE id = ?
+        SELECT * FROM users WHERE id = ?
     """;
 
     private static final String SAVE = """
-            INSERT INTO users (name, surname, age, username, password, inserted_date_at_utc)
-            VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO users (name, surname, age, username, password, inserted_date_at_utc)
+        VALUES (?, ?, ?, ?, ?, ?)
     """;
 
     private static final String UPDATE = """
-            UPDATE users
-            SET name = ?
-            WHERE id = ?
+        UPDATE users SET name = ?, surname = ?, age = ?, username = ?, password = ?, inserted_date_at_utc = ? WHERE id = ?
     """;
 
     private static final String DELETE = """
-            DELETE FROM users
-            WHERE id = ?
+        DELETE FROM users WHERE id = ?
     """;
 
-    public List<User> getAllUsers() throws SQLException {
+
+    private User fillUser(ResultSet resultSet) throws SQLException {
+        User user = new User();
+        user.setId(resultSet.getLong("id"));
+        user.setName(resultSet.getString("name"));
+        user.setSurname(resultSet.getString("surname"));
+        user.setAge(resultSet.getInt("age"));
+        user.setUsername(resultSet.getString("username"));
+        user.setPassword(resultSet.getString("password"));
+        user.setInsertedDateAtUtc(resultSet.getTimestamp("inserted_date_at_utc").toLocalDateTime());
+        return user;
+    }
+
+    private void buildQuery(PreparedStatement preparedStatement, User user) throws SQLException {
+        preparedStatement.setString(1, user.getName());
+        preparedStatement.setString(2, user.getSurname());
+        preparedStatement.setInt(3, user.getAge());
+        preparedStatement.setString(4, user.getUsername());
+        preparedStatement.setString(5, user.getPassword());
+        preparedStatement.setTimestamp(6, new Timestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()));
+    }
+
+    public List<User> findAll() throws SQLException {
         List<User> users = new ArrayList<>();
         try (Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_QUERY);
              ResultSet resultSet = preparedStatement.executeQuery()
         ) {
             while (resultSet.next()) {
-                User user = new User();
-                user.setId(resultSet.getLong("id"));
-                user.setName(resultSet.getString("name"));
-                user.setSurname(resultSet.getString("surname"));
-                user.setAge(resultSet.getInt("age"));
-                user.setUsername(resultSet.getString("username"));
-                user.setPassword(resultSet.getString("password"));
-                user.setInsertedAtUtc(resultSet.getTimestamp("inserted_date_at_utc").toLocalDateTime());
+                User user = fillUser(resultSet);
 
                 users.add(user);
             }
@@ -63,13 +75,7 @@ public class UserRepository {
             try(ResultSet resultSet = preparedStatement.executeQuery()) {
                 User user = new User();
                 while (resultSet.next()) {
-                    user.setId(resultSet.getLong("id"));
-                    user.setName(resultSet.getString("name"));
-                    user.setSurname(resultSet.getString("surname"));
-                    user.setAge(resultSet.getInt("age"));
-                    user.setUsername(resultSet.getString("username"));
-                    user.setPassword(resultSet.getString("password"));
-                    user.setInsertedAtUtc(resultSet.getTimestamp("inserted_date_at_utc").toLocalDateTime());
+                    user = fillUser(resultSet);
                 }
                 return user;
             }
@@ -80,23 +86,18 @@ public class UserRepository {
         try(Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
             PreparedStatement preparedStatement = connection.prepareStatement(SAVE)
         ) {
-            preparedStatement.setString(1, user.getName());
-            preparedStatement.setString(2, user.getSurname());
-            preparedStatement.setInt(3, user.getAge());
-            preparedStatement.setString(4, user.getUsername());
-            preparedStatement.setString(5, user.getPassword());
-            preparedStatement.setTimestamp(6, new Timestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()));
+            buildQuery(preparedStatement, user);
 
-            preparedStatement.execute();
+            preparedStatement.executeUpdate();
         }
     }
 
-    public void update(int id, String name) throws SQLException {
+    public void update(User user) throws SQLException {
         try(Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE)
         ) {
-            preparedStatement.setString(1, name);
-            preparedStatement.setInt(2, id);
+            buildQuery(preparedStatement, user);
+            preparedStatement.setLong(7, user.getId());
 
             preparedStatement.executeUpdate();
         }
