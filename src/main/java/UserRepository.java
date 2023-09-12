@@ -82,15 +82,26 @@ public class UserRepository {
         }
     }
 
-    public void save(User user) throws SQLException {
+    public User save(User user) throws SQLException {
         try(Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-            PreparedStatement preparedStatement = connection.prepareStatement(SAVE)
+            PreparedStatement preparedStatement = connection.prepareStatement(SAVE, Statement.RETURN_GENERATED_KEYS)
         ) {
             buildQuery(preparedStatement, user);
 
             preparedStatement.executeUpdate();
+
+            try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    long id = generatedKeys.getLong(1);
+                    user.setId(id);
+                }
+            }
+
+            return user;
         }
     }
+
+
 
     public void update(User user) throws SQLException {
         try(Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
