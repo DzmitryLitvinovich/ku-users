@@ -82,7 +82,7 @@ public class UserRepository {
         }
     }
 
-    public User save(User user) throws SQLException {
+    public void save(User user) throws SQLException {
         try(Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
             PreparedStatement preparedStatement = connection.prepareStatement(SAVE, Statement.RETURN_GENERATED_KEYS)
         ) {
@@ -96,8 +96,6 @@ public class UserRepository {
                     user.setId(id);
                 }
             }
-
-            return user;
         }
     }
 
